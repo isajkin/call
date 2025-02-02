@@ -1,5 +1,7 @@
 <?php
-
+/*
+@author Vladimir Isajkin <v.isajkin@gmail.com>
+*/
 if(function_exists('call_isop')==false){
     function call_isop($op=""){
         switch($op){
