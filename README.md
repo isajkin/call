@@ -14,7 +14,7 @@
 При отсутствии конструкций "call:" в исходной строке, возвращается необработанная строка.
 
   Пример 1:
-$x="call:.text1,text2,text3";
+$x="call:.,text1,text2,text3";
 echo call_exec($x);
 output:
 text1text2ttext3
