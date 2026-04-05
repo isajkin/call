@@ -2,6 +2,7 @@
 /*
 @author Vladimir Isajkin <v.isajkin@gmail.com>
 */
+
 if(function_exists('call_isop')==false){
     function call_isop($op=""){
         switch($op){
@@ -22,14 +23,17 @@ if(function_exists('call_isop')==false){
             case "/":
             case "&&":
             case "||":
-            case ".":return true;
+            case ".":
+            case "?":
+            case "[":
+            case "[]":return true;
             default:return false;
         }
     }
 }
 
 if(function_exists('call_op')==false){
-    function call_op($op="",$a="",$b=""){
+    function call_op($op="",$a="",$b="",$c=""){
         switch($op){
             case "!":return !(bool)$a;
             case "==":return $a==$b;
@@ -48,40 +52,32 @@ if(function_exists('call_op')==false){
             case "/":return $a/$b;
             case "&&":$ret=$a[0];for($i=1;$i<count($a);$i++){$ret=($ret && $a[$i]);}return $ret;
             case "||":$ret=$a[0];for($i=1;$i<count($a);$i++){$ret=($ret || $a[$i]);}return $ret;
+            case "[":return call_key($a);
+            case "[]":return call_key($a);
             case ".":return implode("",$a);
+            case "?":return $a?$b:$c;
             default:return $op;
             
         }
     }
 }
 
-if(function_exists('call_array_para')==false){
-    function call_array_para(){
-        $ret=array();
-        $a=func_get_args();
-        $i=true;
-        $key="";
-        $val="";
-        foreach($a as $v){
-            if($i){
-                $key=$v;
+if(function_exists('call_key')==false){
+    function call_key($a=array()){
+        $ret=[];
+        foreach($a as $key=>$val){
+            if(strstr($val,"=>")){
+                $x=explode("=>",$val);
+                $ret[$x[0]]=$x[1];
             }
             else{
-                $val=$v;
-                $ret[$key]=$val;
+                $ret[]=$val;
             }
-            $i=!$i;
         }
         return $ret;
     }
 }
 
-if(function_exists('call_array')==false){
-    function call_array(){
-        $a=func_get_args();
-        return $a;
-    }
-}
 if(function_exists('call_explode')==false){
 	function call_explode($r=",",$expr="",$e=""){
 	    $out=array();
@@ -208,19 +204,23 @@ if(function_exists('call_exec')==false){
 	        }
 	        if(is_array($param1)){
 	            foreach($param1 as $k=>$v){
-          	        $x1=str_replace($k,(string)$v,$x1);
+                    if(is_string($x1)){
+              	        $x1=str_replace($k,(string)$v,$x1);
+                    }
 	            }     
 	        }
 	        else{
-    	        $x1=str_replace("param1",(string)$param1,$x1);
-    	        $x1=str_replace("param2",(string)$param2,$x1);
+	            if(is_string($x1)){
+        	        $x1=str_replace("param1",(string)$param1,$x1);
+        	        $x1=str_replace("param2",(string)$param2,$x1);
+	            }
 	        }
             $x[$i]=call_exec($x1,$param1,$param2);
 	    }
 	    $x1=$x[0];
 	    if($c>1){
 	        if(call_isop($x1)){
-	            if($x1=="." or $x1=="||" or $x1=="&&" or $x1=="+" or $x1=="*"){
+	            if($x1=="." or $x1=="||" or $x1=="&&" or $x1=="+" or $x1=="*" or $x1=="[" or $x1=="[]"){
 	                $op=$x1;
 	                $x1=array_slice($x,1);
 	                $x1=call_op($op,$x1);
@@ -233,6 +233,11 @@ if(function_exists('call_exec')==false){
             	        if($c==3){
             	            $x1=call_op($x1,$x[1],$x[2]);
             	        }
+            	        else{
+            	            if($c==4){
+            	                $x1=call_op($x1,$x[1],$x[2],$x[3]);
+            	            }
+            	        }
     	            }
 	            }
 	            return $x1;
@@ -241,5 +246,6 @@ if(function_exists('call_exec')==false){
 	    return call_user_func_array($x1,array_slice($x,1));
 	}
 }	
+
 
 ?>
